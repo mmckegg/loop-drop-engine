@@ -1,0 +1,12 @@
+{
+  "name": "loop-drop-engine",
+  "browser": "index.js",
+  "version": "0.0.0",
+  "author": "Matt McKegg",
+  "dependencies": {
+    "soundbank": "*",
+    "ditty": "*",
+    "bopper": "*",
+    "midi-looper": "*"
+  }
+}
