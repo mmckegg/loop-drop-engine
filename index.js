@@ -13,6 +13,18 @@ module.exports = function(audioContext){
   var instances = {}
   var streams = []
 
+  var commandHandlers = {
+    'stop': function(){
+      clock.stop()
+    },
+    'start': function(){
+      clock.start()
+    },
+    'setTempo': function(command){
+      clock.setTempo(command.value)
+    }
+  }
+
   return {
 
     getClock: function(){
@@ -23,9 +35,11 @@ module.exports = function(audioContext){
       return instances[name] || null
     },
 
+    handleCommand: function(name, cb){
+      commandHandlers[name] = cb
+    },
+
     createInstance: function(name){
-
-
 
       var instance = Soundbank(audioContext)
       var ditty = Ditty(clock)
@@ -54,6 +68,13 @@ module.exports = function(audioContext){
 
       var clockStream = Plex(stream, 'clock')
       var beatStream = Plex(stream, 'beat')
+      var commandStream = Plex(stream, 'commands')
+
+      commandStream.on('data', function(data){
+        if (commandHandlers[data.command]){
+          commandHandlers[data.command](data)
+        }
+      })
 
       clock.pipe(clockStream)
       clock.on('beat', function(pos){
