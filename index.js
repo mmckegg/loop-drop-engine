@@ -53,7 +53,12 @@ module.exports = function(audioContext){
     connect: function(stream){
 
       var clockStream = Plex(stream, 'clock')
+      var beatStream = Plex(stream, 'beat')
+
       clock.pipe(clockStream)
+      clock.on('beat', function(pos){
+        beatStream.write(pos)
+      })
 
       streams.push(stream)
 
