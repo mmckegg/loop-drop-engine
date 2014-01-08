@@ -1,5 +1,6 @@
 var Bopper = require('bopper')
 var Through = require('through')
+var Plex = require('plexy')
 
 var Ditty = require('ditty')
 var MidiLooper = require('midi-looper')
@@ -64,7 +65,19 @@ module.exports = function(audioContext){
       return instance
     },
 
-    connect: function(stream){
+    getStream: function(){
+
+      var stream = Through(function(data){
+        stream.remote.queue(data)
+      }, function(){
+        stream.remote.queue(null)
+      })
+
+      stream.remote = Through(function(data){
+        stream.queue(data)
+      }, function(){
+        stream.queue(null)
+      })
 
       var clockStream = Plex(stream, 'clock')
       var beatStream = Plex(stream, 'beat')
@@ -88,28 +101,11 @@ module.exports = function(audioContext){
         connectInstance(instance, stream)
 
       })
+
+      return stream.remote
     }
 
   }
-}
-
-function Plex(stream, channel){
-  var result = Through(function(data){
-    stream.write(JSON.stringify({channel: result.channel, data: data}))
-  })
-  result.channel = channel
-  stream.on('data', function(data){
-    var object = null
-
-    try {
-      object = JSON.parse(data)
-    } catch (ex){}
-
-    if (object && object.channel == result.channel){
-      result.queue(object.data)
-    }
-  })
-  return result
 }
 
 function connectInstance(instance, stream){
