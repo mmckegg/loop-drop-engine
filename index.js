@@ -45,7 +45,12 @@ module.exports = function(audioContext){
       var instance = Soundbank(audioContext)
       var ditty = Ditty(clock)
 
-      instance.looper = MidiLooper(clock.getCurrentPosition)
+      var exclude = {}
+      instance.on('change', function(data){
+        exclude['144/' + data.id] = data.exclude
+      })
+
+      instance.looper = MidiLooper(clock.getCurrentPosition, {exclude: exclude})
       instance.name = name
 
       // feedback loop
